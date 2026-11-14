@@ -231,9 +231,10 @@ async function loadGuests(){
 
  const {data,error}=await db
  .from("guesthouses")
- .select("*,guesthouse_images(id,image_url)")
- .eq("is_published",true)
- .order("created_at",{ascending:false});
+.select("*,guesthouse_images(id,image_url)")
+.eq("is_published", true)
+.gt("expires_at", new Date().toISOString())
+.order("created_at", { ascending: false });
 
  if(error){
   document.getElementById("guestCards").innerHTML=
@@ -529,13 +530,16 @@ imageStatus.classList.add("hidden");
  await loadGuests();
 }
 
+
 async function loadAdminList(){
  if(!isAdmin)return;
 
  const {data,error}=await db.from("guesthouses")
- .select("*").order("created_at",{ascending:false});
+ .select("*")
+ .order("created_at",{ascending:false});
 
  const box=document.getElementById("adminList");
+
  if(error){
   box.textContent="Imeshindikana kupakia orodha.";
   return;
@@ -546,18 +550,149 @@ async function loadAdminList(){
   return;
  }
 
- box.innerHTML=data.map(g=>`
+ box.innerHTML=data.map(g=>{
+
+  const expiry = g.ad_expires_at
+   ? new Date(g.ad_expires_at)
+   : null;
+
+  const now = new Date();
+
+  const expired = !expiry || expiry <= now;
+
+  const daysLeft = expiry
+   ? Math.max(0,Math.ceil(
+      (expiry-now)/(1000*60*60*24)
+     ))
+   : 0;
+
+  const expiryText = expiry
+   ? expiry.toLocaleDateString("sw-TZ",{
+       day:"2-digit",
+       month:"long",
+       year:"numeric"
+     })
+   : "Haijawekwa";
+
+  return `
   <div class="admin-item">
+
    <b>${safe(g.name)}</b>
-   <p class="muted">${safe(g.region)} - ${safe(g.district)} | TSh ${money(g.price_per_night)}</p>
-   <p class="muted">Hali: ${g.is_published?"Imechapishwa":"Haijachapishwa"}</p>
+
+   <p class="muted">
+    ${safe(g.region)} - ${safe(g.district)}
+    | TSh ${money(g.price_per_night)}
+   </p>
+
+   <p class="muted">
+    Hali: ${g.is_published?"Imechapishwa":"Haijachapishwa"}
+   </p>
+
+   <div style="
+    background:#302130;
+    padding:12px;
+    border-radius:10px;
+    margin:10px 0;
+   ">
+
+    <p>
+     <b>Tarehe ya kuisha:</b>
+     ${expiryText}
+    </p>
+
+    ${
+     expired
+     ? `<b style="color:#ff4545">
+         ⚠️ IMEISHA MUDA
+        </b>`
+     : `<b style="color:#36d98a">
+         ⏳ Siku zilizobaki: ${daysLeft}
+        </b>`
+    }
+
+   </div>
+
    <div class="actions">
-    <button class="primary" onclick="editGuest('${g.id}')">HARIRI</button>
-    <button onclick="togglePublish('${g.id}',${!g.is_published})">${g.is_published?"FICHA":"CHAPISHA"}</button>
-    <button class="danger" onclick="deleteGuest('${g.id}')">FUTA</button>
+
+    <button class="primary"
+     onclick="editGuest('${g.id}')">
+     HARIRI
+    </button>
+
+    <button
+     onclick="togglePublish('${g.id}',${!g.is_published})">
+     ${g.is_published?"FICHA":"CHAPISHA"}
+    </button>
+
+    <button
+     style="background:#168b56;color:white"
+     onclick="extendGuestAd('${g.id}')">
+     ONGEZA MUDA (+ SIKU 30)
+    </button>
+
+    <button class="danger"
+     onclick="deleteGuest('${g.id}')">
+     FUTA
+    </button>
+
    </div>
   </div>
- `).join("");
+  `;
+ }).join("");
+}
+
+
+// KUONGEZA MUDA WA TANGAZO
+async function extendGuestAd(id){
+
+ if(!isAdmin)return;
+
+ const confirmed=confirm(
+  "Je, umepokea na kuthibitisha malipo mapya ya TSh 2,000 kwa tangazo hili? Muda utaongezwa siku 30."
+ );
+
+ if(!confirmed)return;
+
+ const {data,error:readError}=await db
+  .from("guesthouses")
+  .select("ad_expires_at")
+  .eq("id",id)
+  .single();
+
+ if(readError || !data){
+  alert("Imeshindikana kupata taarifa za tangazo.");
+  return;
+ }
+
+ const now=new Date();
+
+ const oldExpiry=data.ad_expires_at
+  ? new Date(data.ad_expires_at)
+  : now;
+
+ const startDate=oldExpiry>now
+  ? oldExpiry
+  : now;
+
+ const newExpiry=new Date(
+  startDate.getTime()+(30*24*60*60*1000)
+ );
+
+ const {error}=await db
+  .from("guesthouses")
+  .update({
+   ad_expires_at:newExpiry.toISOString()
+  })
+  .eq("id",id);
+
+ if(error){
+  alert("Imeshindikana kuongeza muda: "+error.message);
+  return;
+ }
+
+ alert("Hongera! Tangazo limeongezewa siku 30.");
+
+ loadAdminList();
 }
 
 async function editGuest(id){

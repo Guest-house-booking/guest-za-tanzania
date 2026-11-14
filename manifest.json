@@ -1,0 +1,21 @@
+
+{
+  "name": "GUEST ZA TANZANIA",
+  "short_name": "GUEST TZ",
+  "description": "Tafuta Guest House na sehemu za kulala Tanzania nzima.",
+  "lang": "sw",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f7f5",
+  "theme_color": "#124b3b",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

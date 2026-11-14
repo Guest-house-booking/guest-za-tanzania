@@ -608,5 +608,186 @@ db.auth.onAuthStateChange((event)=>{
  await checkAdmin();
 })();
 </script>
+ 
+<style>
+#advertiseBtn {
+  position: fixed;
+  right: 15px;
+  bottom: 20px;
+  z-index: 9998;
+  background: #087f5b;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 14px 18px;
+  font-weight: bold;
+  box-shadow: 0 3px 12px #0005;
+  cursor: pointer;
+}
+#advertisePanel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000b;
+  padding: 15px;
+  overflow-y: auto;
+}
+.advertise-card {
+  background: white;
+  color: #222;
+  max-width: 480px;
+  margin: 35px auto;
+  padding: 22px;
+  border-radius: 15px;
+  font-family: Arial, sans-serif;
+}
+.advertise-card h2 {
+  color: #087f5b;
+  margin-top: 0;
+}
+.advertise-card p {
+  line-height: 1.6;
+}
+.advertise-price {
+  background: #e8f7ef;
+  padding: 14px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 23px;
+  font-weight: bold;
+  color: #087f5b;
+}
+.advertise-pay {
+  background: #f5f5f5;
+  padding: 14px;
+  border-radius: 10px;
+  margin: 15px 0;
+}
+.advertise-whatsapp {
+  display: block;
+  background: #128c45;
+  color: white;
+  padding: 15px;
+  border-radius: 9px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: bold;
+  margin-top: 15px;
+}
+.advertise-close {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #aaa;
+  background: white;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+</style>
+
+<button id="advertiseBtn" onclick="openAdvertisePanel()">
+  + TANGAZA GUEST HOUSE YAKO
+</button>
+
+<div id="advertisePanel">
+  <div class="advertise-card">
+    <h2>📢 TANGAZA GUEST HOUSE YAKO</h2>
+
+    <p>
+      Unamiliki Guest House, Lodge au Hotel?
+      Tangaza biashara yako kwenye GUEST ZA TANZANIA
+      ili wateja waweze kuiona na kuwasiliana nawe kwa urahisi.
+    </p>
+
+    <div class="advertise-price">
+      TSh 2,000
+      <div style="font-size:14px;font-weight:normal">
+        Kwa mwezi mmoja
+      </div>
+    </div>
+
+    <h3>💳 JINSI YA KULIPIA</h3>
+    <div class="advertise-pay">
+      <p><b>Namba ya malipo:</b> 157444240</p>
+      <p><b>Jina la mpokeaji:</b> PAULO ELIASI</p>
+      <p><b>Kiasi:</b> TSh 2,000</p>
+    </div>
+
+    <p>
+      1. Fungua menyu ya malipo kwenye mtandao wako wa simu.
+      <br><br>
+      2. Chagua huduma ya Lipa kwa Namba au malipo ya biashara
+      kulingana na chaguo zinazopatikana kwenye mtandao wako.
+      <br><br>
+      3. Ingiza namba ya malipo 157444240.
+      <br><br>
+      4. Hakikisha jina la mpokeaji ni PAULO ELIASI na kiasi ni TSh 2,000.
+      <br><br>
+      5. Thibitisha malipo na hifadhi SMS au risiti ya muamala.
+    </p>
+
+    <h3>📲 THIBITISHA MALIPO</h3>
+    <p>
+      Baada ya kulipa, bonyeza kitufe hapa chini.
+      WhatsApp itafunguka ikiwa na ujumbe wa uthibitisho.
+      Ambatanisha picha ya risiti au SMS ya malipo.
+    </p>
+
+    <a
+      class="advertise-whatsapp"
+      id="advertiseWhatsApp"
+      href="#"
+      target="_blank"
+      rel="noopener">
+      WHATSAPP: THIBITISHA MALIPO
+    </a>
+
+    <p style="font-size:13px;color:#666">
+      Baada ya kupokea uthibitisho, tutakagua malipo.
+      Ukithibitishwa, tutakuomba maelezo na picha za Guest House
+      yako ili tuiweke kwenye tovuti kwa mwezi mmoja.
+    </p>
+
+    <button class="advertise-close"
+      onclick="closeAdvertisePanel()">
+      FUNGA
+    </button>
+  </div>
+</div>
+
+<script>
+function openAdvertisePanel() {
+  document.getElementById("advertisePanel").style.display = "block";
+}
+
+function closeAdvertisePanel() {
+  document.getElementById("advertisePanel").style.display = "none";
+}
+
+(function () {
+  const message =
+`Habari, nataka kutangaza Guest House yangu kwenye GUEST ZA TANZANIA.
+
+Jina langu:
+Jina la Guest House:
+Namba niliyolipia:
+Kiasi: TSh 2,000
+Namba ya malipo: 157444240
+Jina la mpokeaji: PAULO ELIASI
+
+Namba ya kumbukumbu ya muamala:
+Tarehe na muda wa malipo:
+
+Nimeambatanisha risiti/SMS ya malipo.
+Naomba mthibitishe malipo yangu na kunielekeza hatua zinazofuata za kutuma maelezo na picha za Guest House yangu.`;
+
+  const whatsappLink =
+    "https://wa.me/255702715377?text=" +
+    encodeURIComponent(message);
+
+  document.getElementById("advertiseWhatsApp").href = whatsappLink;
+})();
+</script>
 </body>
 </html>

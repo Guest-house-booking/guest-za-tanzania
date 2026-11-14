@@ -226,7 +226,6 @@ function phoneNumber(p){
  return String(p||"").replace(/\D/g,"");
 }
 
-
 async function loadGuests(){
  document.getElementById("guestCards").innerHTML=
  '<div class="empty">Inapakia...</div>';
@@ -306,6 +305,56 @@ function renderGuests(){
 
 document.getElementById("searchText").addEventListener("input",renderGuests);
 document.getElementById("regionFilter").addEventListener("change",renderGuests);
+
+async function loadOwnerDashboard() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("owner");
+
+  if (!token) return;
+
+  document.getElementById("ownerDashboard").style.display = "block";
+
+  const info = document.getElementById("ownerInfo");
+  info.innerHTML = "Inapakia taarifa...";
+
+  const { data, error } = await db.rpc(
+    "get_guesthouse_owner_dashboard",
+    { p_token: token }
+  );
+
+  if (error || !data) {
+    info.innerHTML = "Link si sahihi au imeharibika.";
+    console.error(error);
+    return;
+  }
+
+  const expiry = data.ad_expires_at
+    ? new Date(data.ad_expires_at)
+    : null;
+
+  const daysLeft = expiry
+    ? Math.max(0, Math.ceil((expiry - new Date()) / 86400000))
+    : 0;
+
+  info.innerHTML = `
+    <h3>${escapeHTML(data.name || "")}</h3>
+    <p>Eneo: ${escapeHTML(data.region || "")}, ${escapeHTML(data.district || "")}</p>
+    <p>Waliotembelea: <b>${Number(data.views_count || 0)}</b></p>
+    <p>Tangazo linaisha: <b>${expiry ? expiry.toLocaleDateString("sw-TZ") : "Haijawekwa"}</b></p>
+    <p>Siku zilizobaki: <b>${daysLeft}</b></p>
+    <p>Hali: <b>${data.is_published ? "Limechapishwa" : "Halijachapishwa"}</b></p>
+  `;
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
+}
 
 async function adminLogin(e){
  e.preventDefault();
@@ -928,5 +977,27 @@ Naomba mthibitishe malipo yangu na kunielekeza hatua zinazofuata za kutuma maele
   document.getElementById("advertiseWhatsApp").href = whatsappLink;
 })();
 </script>
+ 
+<!-- OWNER DASHBOARD -->
+<section id="ownerDashboard" style="display:none;max-width:600px;margin:25px auto;padding:20px;background:#211521;color:white;border-radius:15px;">
+  <h2 style="color:#e84b91;">DASHBOARD YA MMILIKI</h2>
+
+  <div id="ownerInfo">Inapakia taarifa...</div>
+
+  <hr style="border-color:#555;margin:20px 0;">
+
+  <h3>Kuongeza muda wa tangazo</h3>
+  <p>Malipo ya mwezi mmoja ni <b>TSh 2,000</b>.</p>
+  <p>Lipa kupitia mitandao ya simu kwa namba:</p>
+  <h2 style="color:#ffd166;">157444240</h2>
+  <p>Jina: <b>PAULO ELIASI</b></p>
+
+  <p>Baada ya kulipa, tuma uthibitisho kupitia WhatsApp.</p>
+  <a href="https://wa.me/255702715377?text=Habari%2C%20nimelipia%20kuongeza%20muda%20wa%20tangazo%20langu%20la%20Guest%20House."
+     target="_blank"
+     style="display:block;text-align:center;background:#25D366;color:white;padding:14px;border-radius:10px;text-decoration:none;font-weight:bold;">
+     TUMA UTHIBITISHO WHATSAPP
+  </a>
+</section>
 </body>
 </html>

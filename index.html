@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GUEST ZA TANZANIA | Guest House Booking</title>
 <meta name="description" content="Tafuta Guest House, linganisha bei na fanya booking Tanzania nzima.">
+ <link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#124b3b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="GUEST ZA TANZANIA">
+<link rel="apple-touch-icon" href="./icon.svg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
@@ -71,6 +77,10 @@ footer a{color:var(--gold)}
  <div class="nav">
   <div class="logo">GUEST <span>ZA TANZANIA</span></div>
   <div class="actions">
+   <button id="installAppBtn"
+ style="background:#e9b957;color:#124b3b;display:none">
+ 📲 INSTALL APP
+   </button>
    <button class="lang" onclick="changeLang()" id="langBtn">EN</button>
    <a class="group" target="_blank" href="https://chat.whatsapp.com/GGs4fol7ukN3cfNqUWgrnc?s=cl&p=a&iam=2">WAMILIKI / WASIMAMIZI</a>
   </div>
@@ -1059,5 +1069,53 @@ Naomba mthibitishe malipo yangu na kunielekeza hatua zinazofuata za kutuma maele
      TUMA UTHIBITISHO WHATSAPP
   </a>
 </section>
+ 
+let deferredInstallPrompt = null;
+
+const installBtn = document.getElementById("installAppBtn");
+
+// Kusajili Service Worker
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(error => console.error("SW error:", error));
+  });
+}
+
+// Kupokea ruhusa ya installation
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+
+  deferredInstallPrompt = event;
+  installBtn.style.display = "inline-block";
+});
+
+// Kubonyeza INSTALL APP
+installBtn.addEventListener("click", async () => {
+
+  if (!deferredInstallPrompt) {
+    alert(
+      "Kama unatumia iPhone, fungua Safari, " +
+      "bonyeza Share kisha Add to Home Screen."
+    );
+    return;
+  }
+
+  deferredInstallPrompt.prompt();
+
+  const result = await deferredInstallPrompt.userChoice;
+
+  if (result.outcome === "accepted") {
+    installBtn.style.display = "none";
+  }
+
+  deferredInstallPrompt = null;
+});
+
+// App ikiwa tayari imefungwa
+window.addEventListener("appinstalled", () => {
+  installBtn.style.display = "none";
+});
+
 </body>
 </html>

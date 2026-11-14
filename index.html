@@ -226,15 +226,17 @@ function phoneNumber(p){
  return String(p||"").replace(/\D/g,"");
 }
 
+
 async function loadGuests(){
- document.getElementById("guestCards").innerHTML='<div class="empty">Inapakia...</div>';
+ document.getElementById("guestCards").innerHTML=
+ '<div class="empty">Inapakia...</div>';
 
  const {data,error}=await db
  .from("guesthouses")
-.select("*,guesthouse_images(id,image_url)")
-.eq("is_published", true)
-.gt("expires_at", new Date().toISOString())
-.order("created_at", { ascending: false });
+ .select("*,guesthouse_images(id,image_url)")
+ .eq("is_published",true)
+ .gt("ad_expires_at",new Date().toISOString())
+ .order("created_at",{ascending:false});
 
  if(error){
   document.getElementById("guestCards").innerHTML=
@@ -245,8 +247,10 @@ async function loadGuests(){
 
  guests=data||[];
  renderGuests();
- if(isAdmin) loadAdminList();
+
+ if(isAdmin) await loadAdminList();
 }
+
 
 function renderGuests(){
  const q=document.getElementById("searchText").value.toLowerCase().trim();

@@ -1,0 +1,9 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="110" fill="#124b3b"/>
+  <path d="M100 230 L256 100 L412 230 V410 H100 Z" fill="#e9b957"/>
+  <path d="M190 410 V270 H322 V410" fill="#124b3b"/>
+  <text x="256" y="245" text-anchor="middle"
+    font-family="Arial" font-size="75" font-weight="bold"
+    fill="#124b3b">GUEST</text>
+</svg>

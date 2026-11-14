@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GUEST ZA TANZANIA | Guest House Booking</title>
+<meta name="description" content="Tafuta Guest House, linganisha bei na fanya booking Tanzania nzima.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+ --green:#124b3b;--gold:#e9b957;--bg:#f5f7f5;
+ --white:#fff;--dark:#172b25;--muted:#718078;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Arial,sans-serif;color:var(--dark)}
+header{background:var(--green);color:white;padding:17px 5%;position:sticky;top:0;z-index:10}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.logo{font-size:21px;font-weight:900;letter-spacing:.5px}
+.logo span{color:var(--gold)}
+a{color:inherit}
+button{cursor:pointer;border:0;border-radius:8px;padding:11px 15px;font-weight:bold}
+.group{background:#087e51;color:white;text-decoration:none;padding:10px 13px;border-radius:8px;font-size:13px}
+.lang{background:white;color:var(--green)}
+.hero{background:linear-gradient(120deg,#124b3b,#23745b);color:white;text-align:center;padding:42px 15px}
+.hero h1{font-size:30px;margin:0 0 12px}
+.hero p{color:#e4eee8}
+.search{background:white;padding:15px;border-radius:12px;max-width:850px;margin:22px auto 0;display:grid;grid-template-columns:1fr 1fr auto;gap:10px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #d8e0da;border-radius:8px;font-size:14px;background:white}
+.container{max-width:1150px;margin:auto;padding:25px 15px}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:18px;margin-top:18px}
+.card{background:white;border-radius:13px;overflow:hidden;box-shadow:0 3px 14px #193c2b12}
+.cover{width:100%;height:190px;object-fit:cover;background:#e5ece7}
+.cardbody{padding:15px}
+.card h3{margin:0 0 9px}
+.muted{color:var(--muted);font-size:13px}
+.price{font-size:21px;font-weight:900;color:var(--green);margin:13px 0}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.book{background:#128451;color:white;flex:1;text-align:center;text-decoration:none;padding:12px;border-radius:8px;font-weight:bold}
+.mapbtn{background:#edf3ef;color:var(--green);text-decoration:none;padding:12px;border-radius:8px}
+.badge{background:#eaf6ed;color:#137343;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:bold}
+.empty{text-align:center;padding:45px 15px;color:var(--muted)}
+.panel{background:white;padding:20px;border-radius:12px;margin:20px 0}
+.hidden{display:none!important}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.formgrid .full{grid-column:1/-1}
+.primary{background:var(--green);color:white}
+.danger{background:#fee8e8;color:#a42c2c}
+.admin-item{border:1px solid #e4eae5;padding:12px;border-radius:9px;margin:10px 0}
+footer{background:#102e24;color:white;padding:30px 15px;text-align:center;margin-top:35px}
+footer a{color:var(--gold)}
+@media(max-width:600px){
+ .search{grid-template-columns:1fr}
+ .hero h1{font-size:24px}
+ .formgrid{grid-template-columns:1fr}
+ .formgrid .full{grid-column:auto}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="nav">
+  <div class="logo">GUEST <span>ZA TANZANIA</span></div>
+  <div class="actions">
+   <button class="lang" onclick="changeLang()" id="langBtn">EN</button>
+   <a class="group" target="_blank" href="https://chat.whatsapp.com/GGs4fol7ukN3cfNqUWgrnc?s=cl&p=a&iam=2">WAMILIKI / WASIMAMIZI</a>
+  </div>
+ </div>
+</header>
+
+<section class="hero">
+ <h1 id="heroTitle">Pata sehemu nzuri ya kulala Tanzania</h1>
+ <p id="heroText">Tafuta Guest House, linganisha bei na wasiliana na mmiliki moja kwa moja.</p>
+ <div class="search">
+  <input id="searchText" placeholder="Tafuta Guest House au eneo...">
+  <select id="regionFilter">
+   <option value="">Mikoa yote ya Tanzania</option>
+   <option>Arusha</option><option>Dar es Salaam</option>
+   <option>Dodoma</option><option>Geita</option>
+   <option>Iringa</option><option>Kagera</option>
+   <option>Katavi</option><option>Kigoma</option>
+   <option>Kilimanjaro</option><option>Lindi</option>
+   <option>Manyara</option><option>Mara</option>
+   <option>Mbeya</option><option>Morogoro</option>
+   <option>Mtwara</option><option>Mwanza</option>
+   <option>Njombe</option><option>Pemba Kaskazini</option>
+   <option>Pemba Kusini</option><option>Pwani</option>
+   <option>Rukwa</option><option>Ruvuma</option>
+   <option>Shinyanga</option><option>Simiyu</option>
+   <option>Singida</option><option>Songwe</option>
+   <option>Tabora</option><option>Tanga</option>
+   <option>Zanzibar Kaskazini</option>
+   <option>Zanzibar Kusini</option>
+   <option>Zanzibar Mjini Magharibi</option>
+  </select>
+  <button class="primary" onclick="renderGuests()">TAFUTA</button>
+ </div>
+</section>
+
+<main class="container">
+ <div class="section-title">
+  <div>
+   <h2 id="listTitle">Guest House zilizopo</h2>
+   <div class="muted" id="resultCount">Inatafuta matangazo...</div>
+  </div>
+  <button class="primary" onclick="loadGuests()">↻ Refresh</button>
+ </div>
+
+ <div id="guestCards" class="cards">
+  <div class="empty">Inapakia Guest House...</div>
+ </div>
+
+ <section class="panel" id="loginPanel">
+  <h2>Admin Login</h2>
+  <p class="muted">Sehemu maalumu ya msimamizi wa GUEST ZA TANZANIA.</p>
+  <form onsubmit="adminLogin(event)">
+   <p><input id="adminEmail" type="email" placeholder="Email ya Admin" required></p>
+   <p><input id="adminPassword" type="password" placeholder="Password" required></p>
+   <button class="primary">INGIA ADMIN</button>
+  </form>
+  <p id="loginMessage" class="muted"></p>
+ </section>
+
+ <section id="adminPanel" class="hidden">
+  <div class="panel">
+   <div class="section-title">
+    <h2>ADMIN DASHBOARD</h2>
+    <button class="danger" onclick="adminLogout()">Toka</button>
+   </div>
+   <p id="adminStatus" class="muted">Admin ameunganishwa.</p>
+   <h3 id="formTitle">Ongeza Guest House mpya</h3>
+   <form id="guestForm" onsubmit="saveGuest(event)">
+    <div class="formgrid">
+     <input id="gName" placeholder="Jina la Guest House" required>
+     <input id="gRegion" placeholder="Mkoa" required>
+     <input id="gDistrict" placeholder="Wilaya" required>
+     <input id="gWard" placeholder="Kata / Eneo">
+     <input id="gAddress" placeholder="Anuani kamili">
+     <input id="gPrice" type="number" min="0" placeholder="Bei kwa usiku (TSh)" required>
+     <input id="gWhatsapp" type="tel" placeholder="WhatsApp ya mmiliki, mfano 2557..." required>
+     <input id="gMaps" type="url" placeholder="Google Maps link (hiari)">
+     <textarea class="full" id="gDescription" placeholder="Maelezo na huduma za Guest House"></textarea>
+     <div class="full">
+      <label><b>Picha za Guest House (JPG, PNG, WEBP - max 5MB kila moja)</b></label>
+      <input id="gImages" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+     </div>
+     <label class="full"><input id="gPublished" type="checkbox" style="width:auto"> Chapisha tangazo lionekane kwa wateja</label>
+    </div>
+    <div class="actions" style="margin-top:15px">
+     <button class="primary" type="submit" id="saveBtn">HIFADHI GUEST HOUSE</button>
+     <button type="button" onclick="resetForm()">FUTA FOMU</button>
+    </div>
+    <p id="formMessage" class="muted"></p>
+   </form>
+  </div>
+
+  <div class="panel">
+   <h3>Simamia Guest House</h3>
+   <div id="adminList">Inapakia...</div>
+  </div>
+ </section>
+</main>
+
+<footer>
+ <h3>GUEST ZA TANZANIA</h3>
+ <p>Tafuta sehemu ya kulala popote Tanzania.</p>
+ <p><a target="_blank" href="https://chat.whatsapp.com/GGs4fol7ukN3cfNqUWgrnc?s=cl&p=a&iam=2">Group la wamiliki na wasimamizi</a></p>
+ <small>© <span id="year"></span> GUEST ZA TANZANIA. Haki zote zimehifadhiwa.</small>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://vzeczrrurfbcpgvmucjh.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ejz8NyZSTUMfMOgqh7rnGA_EfCkoMxK";
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let guests=[];
+let editingId=null;
+let isAdmin=false;
+let language="sw";
+
+const translations={
+ sw:{
+  hero:"Pata sehemu nzuri ya kulala Tanzania",
+  desc:"Tafuta Guest House, linganisha bei na wasiliana na mmiliki moja kwa moja.",
+  list:"Guest House zilizopo"
+ },
+ en:{
+  hero:"Find a great place to stay in Tanzania",
+  desc:"Search Guest Houses, compare prices and contact owners directly.",
+  list:"Available Guest Houses"
+ }
+};
+
+function changeLang(){
+ language=language==="sw"?"en":"sw";
+ document.getElementById("langBtn").textContent=language==="sw"?"EN":"SW";
+ document.getElementById("heroTitle").textContent=translations[language].hero;
+ document.getElementById("heroText").textContent=translations[language].desc;
+ document.getElementById("listTitle").textContent=translations[language].list;
+ renderGuests();
+}
+
+function money(n){
+ return Number(n||0).toLocaleString("en-US");
+}
+
+function safe(value){
+ return String(value||"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ })[c]);
+}
+
+function phoneNumber(p){
+ return String(p||"").replace(/\D/g,"");
+}
+
+async function loadGuests(){
+ document.getElementById("guestCards").innerHTML='<div class="empty">Inapakia...</div>';
+
+ const {data,error}=await db
+ .from("guesthouses")
+ .select("*,guesthouse_images(id,image_url)")
+ .eq("is_published",true)
+ .order("created_at",{ascending:false});
+
+ if(error){
+  document.getElementById("guestCards").innerHTML=
+  '<div class="empty">Imeshindikana kupakia matangazo. Tafadhali jaribu tena.</div>';
+  console.error(error);
+  return;
+ }
+
+ guests=data||[];
+ renderGuests();
+ if(isAdmin) loadAdminList();
+}
+
+function renderGuests(){
+ const q=document.getElementById("searchText").value.toLowerCase().trim();
+ const region=document.getElementById("regionFilter").value.toLowerCase();
+
+ const filtered=guests.filter(g=>{
+  const text=[g.name,g.region,g.district,g.ward,g.address,g.description].join(" ").toLowerCase();
+  return text.includes(q)&&(!region||g.region.toLowerCase()===region);
+ });
+
+ document.getElementById("resultCount").textContent=
+ filtered.length+" Guest House";
+
+ const box=document.getElementById("guestCards");
+ if(!filtered.length){
+  box.innerHTML='<div class="empty">Hakuna Guest House zilizopatikana. Jaribu kutafuta eneo jingine.</div>';
+  return;
+ }
+
+ box.innerHTML=filtered.map(g=>{
+  const photo=g.guesthouse_images?.[0]?.image_url||"";
+  const wa=phoneNumber(g.whatsapp);
+  const message=encodeURIComponent("Habari, nimeiona Guest House yako kupitia GUEST ZA TANZANIA. Naomba kujua kama kuna chumba na bei ya sasa.");
+  return `
+   <article class="card">
+    ${photo?
+     `<img class="cover" src="${safe(photo)}" alt="${safe(g.name)}" loading="lazy">`:
+     `<div class="cover" style="display:grid;place-items:center;color:#718078">Picha haijawekwa</div>`
+    }
+    <div class="cardbody">
+     <span class="badge">✓ ${safe(g.is_verified?"Imethibitishwa":"Tangazo")}</span>
+     <h3 style="margin-top:12px">${safe(g.name)}</h3>
+     <p class="muted">📍 ${safe(g.region)}, ${safe(g.district)}${g.ward?", "+safe(g.ward):""}</p>
+     <div class="price">TSh ${money(g.price_per_night)} <small style="font-size:12px;font-weight:normal">/ usiku</small></div>
+     <p class="muted">${safe(g.description||"Wasiliana na mmiliki kwa maelezo zaidi.")}</p>
+     <div class="actions">
+      <a class="book" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${message}">BOOKING WHATSAPP</a>
+      ${g.maps_url?`<a class="mapbtn" target="_blank" rel="noopener" href="${safe(g.maps_url)}">📍 MAPS</a>`:""}
+     </div>
+    </div>
+   </article>`;
+ }).join("");
+}
+
+document.getElementById("searchText").addEventListener("input",renderGuests);
+document.getElementById("regionFilter").addEventListener("change",renderGuests);
+
+async function adminLogin(e){
+ e.preventDefault();
+ const email=document.getElementById("adminEmail").value.trim();
+ const password=document.getElementById("adminPassword").value;
+
+ const msg=document.getElementById("loginMessage");
+ msg.textContent="Inaingia...";
+
+ const {error}=await db.auth.signInWithPassword({email,password});
+ if(error){
+  msg.textContent="Imeshindikana kuingia. Hakikisha email na password ni sahihi.";
+  return;
+ }
+ await checkAdmin();
+}
+
+async function checkAdmin(){
+ const {data:{user}}=await db.auth.getUser();
+
+ if(!user){
+  isAdmin=false;
+  document.getElementById("loginPanel").classList.remove("hidden");
+  document.getElementById("adminPanel").classList.add("hidden");
+  return;
+ }
+
+ const {data,error}=await db.from("admin_users")
+ .select("user_id")
+ .eq("user_id",user.id)
+ .maybeSingle();
+
+ if(error||!data){
+  await db.auth.signOut();
+  document.getElementById("loginMessage").textContent="Akaunti hii haina ruhusa ya Admin.";
+  return;
+ }
+
+ isAdmin=true;
+ document.getElementById("loginPanel").classList.add("hidden");
+ document.getElementById("adminPanel").classList.remove("hidden");
+ document.getElementById("adminStatus").textContent="Admin: "+user.email;
+ loadAdminList();
+}
+
+async function adminLogout(){
+ await db.auth.signOut();
+ isAdmin=false;
+ document.getElementById("adminPanel").classList.add("hidden");
+ document.getElementById("loginPanel").classList.remove("hidden");
+ document.getElementById("adminPassword").value="";
+}
+
+function resetForm(){
+ editingId=null;
+ document.getElementById("guestForm").reset();
+ document.getElementById("formTitle").textContent="Ongeza Guest House mpya";
+ document.getElementById("saveBtn").textContent="HIFADHI GUEST HOUSE";
+ document.getElementById("formMessage").textContent="";
+}
+
+async function saveGuest(e){
+ e.preventDefault();
+ if(!isAdmin)return;
+
+ const files=Array.from(document.getElementById("gImages").files);
+ for(const f of files){
+  if(f.size>5*1024*1024){
+   alert("Picha isizidi MB 5: "+f.name);
+   return;
+  }
+  if(!["image/jpeg","image/png","image/webp"].includes(f.type)){
+   alert("Tumia JPG, PNG au WEBP pekee.");
+   return;
+  }
+ }
+
+ const name=document.getElementById("gName").value.trim();
+ const slug=name.toLowerCase()
+ .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+ .replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now();
+
+ const record={
+  name,
+  region:document.getElementById("gRegion").value.trim(),
+  district:document.getElementById("gDistrict").value.trim(),
+  ward:document.getElementById("gWard").value.trim()||null,
+  address:document.getElementById("gAddress").value.trim()||null,
+  price_per_night:Number(document.getElementById("gPrice").value),
+  whatsapp:phoneNumber(document.getElementById("gWhatsapp").value),
+  maps_url:document.getElementById("gMaps").value.trim()||null,
+  description:document.getElementById("gDescription").value.trim()||null,
+  is_published:document.getElementById("gPublished").checked
+ };
+
+ const msg=document.getElementById("formMessage");
+ msg.textContent="Inahifadhi taarifa...";
+
+ let guestId=editingId;
+ let error;
+
+ if(editingId){
+  ({error}=await db.from("guesthouses").update(record).eq("id",editingId));
+ }else{
+  record.slug=slug;
+  const result=await db.from("guesthouses").insert(record).select("id").single();
+  error=result.error;
+  guestId=result.data?.id;
+ }
+
+ if(error||!guestId){
+  msg.textContent="Hitilafu: "+(error?.message||"Taarifa hazijahifadhiwa.");
+  return;
+ }
+
+ for(const file of files){
+  const path=guestId+"/"+Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+
+  const upload=await db.storage.from("guesthouse-images")
+  .upload(path,file,{contentType:file.type,upsert:false});
+
+  if(upload.error){
+   msg.textContent="Taarifa zimehifadhiwa lakini picha imekataa: "+upload.error.message;
+   return;
+  }
+
+  const {data:publicData}=db.storage.from("guesthouse-images").getPublicUrl(path);
+
+  const imageInsert=await db.from("guesthouse_images").insert({
+   guesthouse_id:guestId,
+   image_url:publicData.publicUrl
+  });
+
+  if(imageInsert.error){
+   msg.textContent="Picha imepakiwa lakini taarifa ya picha haijahifadhiwa: "+imageInsert.error.message;
+   return;
+  }
+ }
+
+ msg.textContent="Guest House imehifadhiwa vizuri!";
+ resetForm();
+ await loadGuests();
+}
+
+async function loadAdminList(){
+ if(!isAdmin)return;
+
+ const {data,error}=await db.from("guesthouses")
+ .select("*").order("created_at",{ascending:false});
+
+ const box=document.getElementById("adminList");
+ if(error){
+  box.textContent="Imeshindikana kupakia orodha.";
+  return;
+ }
+
+ if(!data?.length){
+  box.innerHTML="<p>Hakuna Guest House iliyoongezwa bado.</p>";
+  return;
+ }
+
+ box.innerHTML=data.map(g=>`
+  <div class="admin-item">
+   <b>${safe(g.name)}</b>
+   <p class="muted">${safe(g.region)} - ${safe(g.district)} | TSh ${money(g.price_per_night)}</p>
+   <p class="muted">Hali: ${g.is_published?"Imechapishwa":"Haijachapishwa"}</p>
+   <div class="actions">
+    <button class="primary" onclick="editGuest('${g.id}')">HARIRI</button>
+    <button onclick="togglePublish('${g.id}',${!g.is_published})">${g.is_published?"FICHA":"CHAPISHA"}</button>
+    <button class="danger" onclick="deleteGuest('${g.id}')">FUTA</button>
+   </div>
+  </div>
+ `).join("");
+}
+
+async function editGuest(id){
+ const {data,error}=await db.from("guesthouses").select("*").eq("id",id).single();
+ if(error||!data)return;
+
+ editingId=id;
+ document.getElementById("gName").value=data.name||"";
+ document.getElementById("gRegion").value=data.region||"";
+ document.getElementById("gDistrict").value=data.district||"";
+ document.getElementById("gWard").value=data.ward||"";
+ document.getElementById("gAddress").value=data.address||"";
+ document.getElementById("gPrice").value=data.price_per_night||"";
+ document.getElementById("gWhatsapp").value=data.whatsapp||"";
+ document.getElementById("gMaps").value=data.maps_url||"";
+ document.getElementById("gDescription").value=data.description||"";
+ document.getElementById("gPublished").checked=data.is_published;
+ document.getElementById("formTitle").textContent="Hariri Guest House";
+ document.getElementById("saveBtn").textContent="HIFADHI MABADILIKO";
+ document.getElementById("formMessage").textContent="Picha mpya ni hiari. Picha za zamani zitabaki.";
+ document.getElementById("guestForm").scrollIntoView({behavior:"smooth"});
+}
+
+async function togglePublish(id,value){
+ if(!confirm(value?"Unataka kuchapisha tangazo?":"Unataka kuficha tangazo?"))return;
+ const {error}=await db.from("guesthouses").update({is_published:value}).eq("id",id);
+ if(error){alert(error.message);return;}
+ await loadGuests();
+}
+
+async function deleteGuest(id){
+ if(!confirm("Una uhakika unataka kufuta Guest House hii?"))return;
+ const {error}=await db.from("guesthouses").delete().eq("id",id);
+ if(error){alert(error.message);return;}
+ await loadGuests();
+}
+
+document.getElementById("year").textContent=new Date().getFullYear();
+
+db.auth.onAuthStateChange((event)=>{
+ if(event==="SIGNED_IN"||event==="SIGNED_OUT"){
+  setTimeout(checkAdmin,0);
+ }
+});
+
+(async()=>{
+ await loadGuests();
+ await checkAdmin();
+})();
+</script>
+</body>
+</html>

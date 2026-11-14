@@ -1070,6 +1070,8 @@ Naomba mthibitishe malipo yangu na kunielekeza hatua zinazofuata za kutuma maele
   </a>
 </section>
  
+
+<script>
 let deferredInstallPrompt = null;
 
 const installBtn = document.getElementById("installAppBtn");
@@ -1085,19 +1087,14 @@ if ("serviceWorker" in navigator) {
 // Kupokea ruhusa ya installation
 window.addEventListener("beforeinstallprompt", event => {
   event.preventDefault();
-
   deferredInstallPrompt = event;
   installBtn.style.display = "inline-block";
 });
 
 // Kubonyeza INSTALL APP
 installBtn.addEventListener("click", async () => {
-
   if (!deferredInstallPrompt) {
-    alert(
-      "Kama unatumia iPhone, fungua Safari, " +
-      "bonyeza Share kisha Add to Home Screen."
-    );
+    alert("Tumia menyu ya Chrome kisha chagua Install app au Add to Home Screen.");
     return;
   }
 
@@ -1116,6 +1113,6 @@ installBtn.addEventListener("click", async () => {
 window.addEventListener("appinstalled", () => {
   installBtn.style.display = "none";
 });
-
-</body>
+</script>
+ </body>
 </html>

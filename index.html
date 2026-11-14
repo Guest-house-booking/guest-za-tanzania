@@ -55,6 +55,14 @@ footer a{color:var(--gold)}
  .formgrid{grid-template-columns:1fr}
  .formgrid .full{grid-column:auto}
 }
+ .image-status{
+ background:#eaf6ed;
+ color:#137343;
+ padding:10px;
+ border-radius:8px;
+ margin-top:10px;
+ font-size:13px;
+ }
 </style>
 </head>
 <body>
@@ -142,8 +150,11 @@ footer a{color:var(--gold)}
      <input id="gMaps" type="url" placeholder="Google Maps link (hiari)">
      <textarea class="full" id="gDescription" placeholder="Maelezo na huduma za Guest House"></textarea>
      <div class="full">
-      <label><b>Picha za Guest House (JPG, PNG, WEBP - max 5MB kila moja)</b></label>
-      <input id="gImages" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+ <label><b>Picha za Guest House (JPG, PNG, WEBP)</b></label>
+ <input id="gImages" type="file"
+ accept="image/jpeg,image/png,image/webp"
+ multiple>
+ <div id="imageStatus" class="image-status hidden"></div>
      </div>
      <label class="full"><input id="gPublished" type="checkbox" style="width:auto"> Chapisha tangazo lionekane kwa wateja</label>
     </div>
@@ -341,21 +352,104 @@ function resetForm(){
  document.getElementById("saveBtn").textContent="HIFADHI GUEST HOUSE";
  document.getElementById("formMessage").textContent="";
 }
+async function compressImage(file){
+ return new Promise((resolve,reject)=>{
+  const img=new Image();
+  const url=URL.createObjectURL(file);
 
+  img.onload=async()=>{
+   try{
+    const maxDimension=1600;
+    const scale=Math.min(
+     1,
+     maxDimension/Math.max(img.width,img.height)
+    );
+
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.round(img.width*scale);
+    canvas.height=Math.round(img.height*scale);
+
+    const ctx=canvas.getContext("2d");
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+    let quality=0.82;
+    let blob=null;
+
+    do{
+     blob=await new Promise(r=>
+      canvas.toBlob(r,"image/webp",quality)
+     );
+     quality-=0.10;
+    }while(blob&&blob.size>500*1024&&quality>=0.42);
+
+    URL.revokeObjectURL(url);
+
+    if(!blob){
+     reject(new Error("Picha haikuweza kupunguzwa."));
+     return;
+    }
+
+    if(blob.size>500*1024){
+     reject(new Error("Picha ni kubwa sana hata baada ya kupunguzwa."));
+     return;
+    }
+
+    const compressed=new File(
+     [blob],
+     file.name.replace(/\.[^.]+$/,"")+".webp",
+     {type:"image/webp"}
+    );
+
+    resolve(compressed);
+
+   }catch(err){
+    URL.revokeObjectURL(url);
+    reject(err);
+   }
+  };
+
+  img.onerror=()=>{
+   URL.revokeObjectURL(url);
+   reject(new Error("Picha haikuweza kusomeka."));
+  };
+
+  img.src=url;
+ });
+ }
 async function saveGuest(e){
  e.preventDefault();
  if(!isAdmin)return;
 
- const files=Array.from(document.getElementById("gImages").files);
- for(const f of files){
-  if(f.size>5*1024*1024){
-   alert("Picha isizidi MB 5: "+f.name);
-   return;
-  }
+ const originalFiles=Array.from(
+ document.getElementById("gImages").files
+);
+
+const files=[];
+const imageStatus=document.getElementById("imageStatus");
+
+try{
+ for(let i=0;i<originalFiles.length;i++){
+  const f=originalFiles[i];
+
   if(!["image/jpeg","image/png","image/webp"].includes(f.type)){
-   alert("Tumia JPG, PNG au WEBP pekee.");
-   return;
+   throw new Error("Tumia JPG, PNG au WEBP pekee: "+f.name);
   }
+
+  imageStatus.classList.remove("hidden");
+  imageStatus.textContent=
+   "Inapunguza picha "+(i+1)+" kati ya "+originalFiles.length+"...";
+
+  const compressed=await compressImage(f);
+  files.push(compressed);
+ }
+
+ imageStatus.textContent=
+  "✓ Picha zote zimepunguzwa tayari kwa kupakiwa.";
+
+}catch(err){
+ alert(err.message);
+ imageStatus.classList.add("hidden");
+ return;
  }
 
  const name=document.getElementById("gName").value.trim();
@@ -420,7 +514,8 @@ async function saveGuest(e){
   }
  }
 
- msg.textContent="Guest House imehifadhiwa vizuri!";
+ msg.textContent="Guest House imehifadhiwa vizuri! Picha zimepunguzwa ukubwa automatically.";
+imageStatus.classList.add("hidden"); 
  resetForm();
  await loadGuests();
 }

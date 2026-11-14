@@ -281,11 +281,20 @@ function renderGuests(){
      <p class="muted">📍 ${safe(g.region)}, ${safe(g.district)}${g.ward?", "+safe(g.ward):""}</p>
      <div class="price">TSh ${money(g.price_per_night)} <small style="font-size:12px;font-weight:normal">/ usiku</small></div>
      <p class="muted">${safe(g.description||"Wasiliana na mmiliki kwa maelezo zaidi.")}</p>
-     <div class="actions">
-      <a class="book" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${message}">BOOKING WHATSAPP</a>
-      ${g.maps_url?`<a class="mapbtn" target="_blank" rel="noopener" href="${safe(g.maps_url)}">📍 MAPS</a>`:""}
-     </div>
-    </div>
+     
+<div class="actions">
+  <a class="book" target="_blank" rel="noopener"
+     href="https://wa.me/${wa}?text=${message}">
+     BOOKING WHATSAPP
+  </a>
+
+  <a class="mapbtn" href="tel:+${wa}">
+     ☎ PIGA SIMU
+  </a>
+
+  ${g.maps_url?`<a class="mapbtn" target="_blank" rel="noopener" href="${safe(g.maps_url)}">📍 MAPS</a>`:""}
+</div>
+</div>
    </article>`;
  }).join("");
 }

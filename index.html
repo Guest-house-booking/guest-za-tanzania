@@ -665,7 +665,14 @@ async function loadAdminList(){
 
    </div>
 
-   <div class="actions">
+   
+<div class="actions">
+
+    <button
+     style="background:#087f5b;color:white"
+     onclick="generateOwnerLink('${g.id}')">
+     🔗 TENGENEZA LINK YA MMILIKI
+    </button>
 
     <button class="primary"
      onclick="editGuest('${g.id}')">
@@ -688,7 +695,8 @@ async function loadAdminList(){
      FUTA
     </button>
 
-   </div>
+</div>
+
   </div>
   `;
  }).join("");
@@ -746,6 +754,57 @@ async function extendGuestAd(id){
  alert("Hongera! Tangazo limeongezewa siku 30.");
 
  loadAdminList();
+}
+
+async function generateOwnerLink(guesthouseId){
+
+ if(!isAdmin){
+  alert("Huna ruhusa ya kufanya kitendo hiki.");
+  return;
+ }
+
+ if(!confirm("Unataka kutengeneza link ya mmiliki wa Guest House hii?"))return;
+
+ try{
+
+  const {data,error}=await db.rpc(
+   "admin_create_guesthouse_owner_link",
+   {
+    p_guesthouse_id:guesthouseId
+   }
+  );
+
+  if(error){
+   alert("Imeshindikana kutengeneza link: "+error.message);
+   console.error(error);
+   return;
+  }
+
+  if(!data){
+   alert("Link haijatengenezwa.");
+   return;
+  }
+
+  const ownerLink=new URL(window.location.href);
+  ownerLink.searchParams.set("owner",data);
+
+  const link=ownerLink.toString();
+
+  try{
+   await navigator.clipboard.writeText(link);
+   alert(
+    "LINK YA MMILIKI IMETENGENEZWA!\n\n"+
+    "Link imenakiliwa. Unaweza kumtumia mmiliki kupitia WhatsApp."
+   );
+  }catch(copyError){
+   prompt("Nakili link hii ya mmiliki:",link);
+  }
+
+ }catch(err){
+  alert("Hitilafu: "+err.message);
+  console.error(err);
+ }
+
 }
 
 async function editGuest(id){

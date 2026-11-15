@@ -1,4 +1,3 @@
-
 const CACHE_NAME = "guest-tanzania-v1";
 
 self.addEventListener("install", event => {
